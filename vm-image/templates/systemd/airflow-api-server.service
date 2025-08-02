@@ -1,0 +1,16 @@
+[Unit]
+Description=Airflow webserver
+After=network.target
+ 
+[Service]
+User=airflow
+Group=airflow
+Type=simple
+EnvironmentFile=/etc/default/airflow
+ExecStart=/home/airflow/airflow_venv/bin/airflow api-server --port 8080
+Restart=on-failure
+RestartSec=5s
+PrivateTmp=true
+ 
+[Install]
+WantedBy=multi-user.target
