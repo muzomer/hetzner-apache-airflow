@@ -16,6 +16,7 @@ variable "hcloud_token" {
 variable "ssh_public_key_name" {
   description = "The name of the SSH key stored in the Hetzner Cloud to use for authentication."
   type        = string
+  default     = "apache-airflow-key"
 }
 
 variable "db_name" {

@@ -34,5 +34,5 @@ output "airflow_url" {
 }
 
 output "airflow_ip" {
-  value = "hcloud_server.airflow.ipv4_address}"
+  value = hcloud_server.airflow.ipv4_address
 }
