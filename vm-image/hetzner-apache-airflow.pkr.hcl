@@ -91,10 +91,10 @@ build {
   provisioner "file" {
     content     = <<-EOF
       AIRFLOW_HOME=${var.airflow_user_home}/airflow
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${var.db_username}:${var.db_password}@localhost/${var.db_name}
-      AIRFLOW__CELERY__BROKER_URL=redis://localhost:6379/0
-      AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
       AIRFLOW__API_AUTH__JWT_SECRET=${uuidv4()}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${var.db_username}:${var.db_password}@localhost/${var.db_name}
+      AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__CORE__EXECUTOR=CeleryExecutor
     EOF
     destination = "/etc/default/airflow"
   }
@@ -103,9 +103,9 @@ build {
   provisioner "shell" {
     environment_vars = [
       "AIRFLOW_HOME=${var.airflow_user_home}/airflow",
-      "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${var.db_username}:${var.db_password}@localhost/${var.db_name}",
       "AIRFLOW__CELERY__BROKER_URL=redis://localhost:6379/0",
       "AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager",
+      "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${var.db_username}:${var.db_password}@localhost/${var.db_name}",
     ]
     inline = [
       "${var.airflow_user_home}/airflow_venv/bin/airflow db migrate",
@@ -125,11 +125,18 @@ build {
     destination = "/etc/systemd/system/airflow-api-server.service"
   }
 
+  # Airflow Webserver Systemd Unit
+  provisioner "file" {
+    source      = "templates/systemd/airflow-celery-worker.service"
+    destination = "/etc/systemd/system/airflow-celery-worker.service"
+  }
+
   provisioner "shell" {
     inline = [
       "systemctl daemon-reload",
       "systemctl enable airflow-scheduler",
       "systemctl enable airflow-api-server",
+      "systemctl enable airflow-celery-worker",
     ]
   }
 }

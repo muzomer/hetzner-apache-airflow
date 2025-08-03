@@ -1,0 +1,15 @@
+[Unit]
+Description=Airflow Celery Worker
+After=network.target postgresql.service redis-server.service
+ 
+[Service]
+User=airflow
+Group=airflow
+Type=simple
+EnvironmentFile=/etc/default/airflow
+ExecStart=/home/airflow/airflow_venv/bin/airflow celery worker
+Restart=on-failure
+RestartSec=5s
+ 
+[Install]
+WantedBy=multi-user.target
